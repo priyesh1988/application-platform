@@ -1,0 +1,38 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: appplatform
+      POSTGRES_PASSWORD: appplatform
+      POSTGRES_DB: appplatform
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+  api:
+    build: .
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    environment:
+      DATABASE_URL: postgresql+psycopg://appplatform:appplatform@db:5432/appplatform
+      REDIS_URL: redis://redis:6379/0
+      JWT_DEV_TOKEN: dev-agent-token
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+
+  worker:
+    build: .
+    command: celery -A worker.celery_app.celery_app worker --loglevel=info
+    environment:
+      DATABASE_URL: postgresql+psycopg://launchpad:launchpad@db:5432/launchpad
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      - db
+      - redis
+
