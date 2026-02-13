@@ -37,7 +37,7 @@ curl -X POST http://localhost:8000/deployments/request \
     "data_classification":"internal",
     "exposure":"internal",
     "config":{
-      "image":"registry.chase.internal/demoapp:1.0",
+      "image":"registry.internal/demoapp:1.0",
       "replicas":2
     }
   }'
