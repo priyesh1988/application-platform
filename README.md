@@ -1,101 +1,209 @@
-# Application Platform — AI + LLM Upgrade Edition
+# 🚀 Application Platform — Infrastructure Intelligence
 
-This is a **GitHub-uploadable repo** that extends the core **Application Platform** idea (software-defined deployment control plane) with **heavy AI / heavy LLM** capabilities focused on:
+This is a **GitHub‑uploadable repo** that extends the core **Application Platform** idea  
+(software‑defined deployment control plane) with **AI capabilities** focused on:
 
-- **Developer Experience (DX)**: faster onboarding, fewer mysteries, self-serve troubleshooting
-- **Customer Experience (CX)**: fewer incidents, faster comms, predictable rollouts, transparent reliability
-
-> Repo inspiration: https://github.com/priyesh1988/application-platform (structure + intent). citeturn4view2
-
----
-
-## What’s new (high-signal upgrades)
-
-### DX Upgrades (Developer Experience)
-1) **LLM PR/Commit Risk Scoring**
-- Turns a diff + runtime context into **LOW/MED/HIGH** deployment risk with an explanation.
-- Blocks risky rollouts automatically when policy thresholds are exceeded.
-
-2) **ChatOps “Ask the Platform”**
-- Ask in plain English: “Why did stage fail?” “Which policy blocked prod?”
-- Response includes: **root cause**, **fix**, **next best action**.
-
-3) **RAG-powered Runbook Search**
-- Indexes runbooks, policies, past incidents into a Vector DB.
-- Answer questions with citations (internal docs), not hallucinations.
-
-4) **Auto-Generated Release Notes**
-- Converts commit history into release notes (customer-safe + engineer-deep versions).
-
-### CX Upgrades (Customer Experience)
-1) **Incident Summaries + Timeline**
-- Auto-drafts customer-facing incident updates from traces/logs/alerts.
-- Creates a clean timeline, impact assessment, and status updates.
-
-2) **Reliability “Confidence Score”**
-- Combines SLO error budget burn + recent deploy risk + change rate
-- Produces a customer-facing “confidence meter” for rollouts.
-
-3) **Progressive Delivery by Default**
-- Canary + blue/green using Argo Rollouts.
-- Automatic promotion gates driven by SLO and risk score.
+- 🧑‍💻 Developer Experience (DX): faster onboarding, fewer mysteries, self‑serve troubleshooting  
+- 🤝 Customer Experience (CX): fewer incidents, faster comms, predictable rollouts, transparent reliability  
 
 ---
 
-## Local quickstart (full stack)
+## ⚡ Local Quickstart (Full Stack)
 
-### 1) Configure env
-Copy `.env.example` → `.env` and set keys you want.
+### 1) Configure Environment
 
 ```bash
 cp .env.example .env
 ```
 
-### 2) Run everything
+Modify `.env` with your desired keys.
+
+### 2) Run Everything
+
 ```bash
 docker compose up --build
 ```
 
-### 3) Open
-- API (FastAPI): http://localhost:8000/docs
-- Grafana: http://localhost:3000 (admin/admin)
-- Prometheus: http://localhost:9090
-- Jaeger (traces): http://localhost:16686
-- Qdrant (vector DB): http://localhost:6333
+### 3) Open Interfaces
+
+| Component | URL |
+|-----------|-----|
+| API (FastAPI) | http://localhost:8000/docs |
+| Grafana | http://localhost:3000 (admin/admin) |
+| Prometheus | http://localhost:9090 |
+| Jaeger (Traces) | http://localhost:16686 |
+| Qdrant (Vector DB) | http://localhost:6333 |
 
 ---
 
-## API endpoints (high value)
-- `POST /deployments/request` — request an environment (with policy + AI risk scoring)
-- `POST /ai/risk-score` — score risk for commit/diff payload
-- `POST /ai/chat` — chat with platform (RAG + tools)
-- `POST /ai/incident-summary` — generate customer/exec/engineer incident summaries
-- `POST /rag/ingest` — ingest runbooks/policies into vector store
-- `GET  /metrics` — Prometheus metrics endpoint
+## 📦 Example: AI‑Powered Deployment Request (End‑to‑End)
+
+Assume your stack is running at:
+
+`http://localhost:8001`
+
+### Step 1 — Developer Submits Deployment Request
+
+```bash
+curl -X POST http://localhost:8001/deploy   -H "Content-Type: application/json"   -d '{
+    "app_name": "payments-service",
+    "environment": "prod",
+    "replicas": 4,
+    "cpu_request": "500m",
+    "memory_request": "512Mi",
+    "exposure": "external",
+    "data_classification": "pii"
+  }'
+```
 
 ---
 
-## Production notes
-- Replace sample auth with real OIDC issuer + JWKS
-- Move secrets to Vault / AWS Secrets Manager
-- Back vector store with durable storage
-- Split “api” vs “worker” services (Celery/Arq) for async AI workloads
-- Use IRSA/OIDC for AWS in CI/CD (already scaffolded)
+### Step 2 — What Happens Internally
+
+#### 1️⃣ AI Risk Engine (LLM Scoring)
+
+The platform sends a structured prompt to the LLM:
+
+- Environment: prod  
+- Exposure: external  
+- Data: PII  
+- Replicas: 4  
+- CPU: 500m  
+- Memory: 512Mi  
+
+Example LLM Response:
+
+```json
+{
+  "risk_level": "HIGH",
+  "reasons": [
+    "PII workload exposed externally in production",
+    "Resource requests may be under-provisioned for PII handling"
+  ],
+  "recommendations": [
+    "Enable WAF",
+    "Increase memory to 1Gi",
+    "Enable network policy isolation"
+  ]
+}
+```
+
+#### 2️⃣ Policy Enforcement Layer
+
+- HIGH risk → manual approval or auto-adjust config  
+- LOW risk → auto-approve  
+
+#### 3️⃣ Vector DB (RAG Context)
+
+The system queries Qdrant:
+
+“Have we deployed similar PII workloads before?”
+
+Historical deployments & failure traces are fetched to inform AI scoring.
+
+#### 4️⃣ Kafka Event Emission
+
+```json
+{
+  "event_type": "deployment_requested",
+  "app": "payments-service",
+  "risk": "HIGH",
+  "timestamp": "..."
+}
+```
+
+Used for:
+
+- Billing  
+- Audit logging  
+- Notifications  
+- Metrics aggregation  
+
+#### 5️⃣ PostgreSQL Persistence
+
+Stored in:
+
+- deployment_requests  
+  - id  
+  - tenant_id  
+  - risk_score  
+  - status  
+  - created_at  
+
+#### 6️⃣ Observability (OpenTelemetry → Jaeger)
+
+Trace view:
+
+deploy_request → llm_risk_analysis → vector_lookup → kafka_emit → db_write
+
+#### 7️⃣ Metrics (Prometheus → Grafana)
+
+Metrics exposed:
+
+- deployment_requests_total  
+- ai_risk_score_bucket  
+- deployment_failures_total  
+
+Dashboards:
+
+- AI risk distribution  
+- Deployment latency  
+- Tenant usage metrics  
+- LLM cost metrics  
 
 ---
 
-## Repo layout
-- `app/` FastAPI control plane + auth + policy + deployment workflow
-- `ai/` LLM + embeddings + RAG + summarizers
-- `observability/` OTEL collector configs, dashboards
-- `policy/` OPA + Kyverno examples
-- `gitops/` ArgoCD + Argo Rollouts progressive delivery
-- `tenancy/` namespace isolation + quotas + RBAC templates
-- `infra/terraform/` multi-region scaffolding (optional)
+## ❌ Failure Case Example
+
+Request:
+
+```json
+{
+  "environment": "prod",
+  "replicas": 1,
+  "memory_request": "128Mi",
+  "data_classification": "regulated"
+}
+```
+
+Example LLM Response:
+
+```json
+{
+  "risk_level": "CRITICAL",
+  "action": "REJECT"
+}
+```
+
+API Response:
+
+```json
+{
+  "status": "rejected",
+  "reason": "Regulated workload under-provisioned for production"
+}
+```
+
+Result:
+
+- No K8s resources created  
+- Audit trail recorded  
+- Kafka event emitted  
+- Trace visible in Jaeger  
+- Metrics updated  
 
 ---
 
+## 🧪 Quick Test Commands
 
-### Note
-- Postgres is mapped to host port **5433** to avoid conflicts.
-- Traces export directly to **Jaeger OTLP** (no otel-collector in local compose).
+Health check:
+
+```bash
+curl http://localhost:8001/health
+```
+
+Trigger deploy:
+
+```bash
+curl -X POST http://localhost:8001/deploy   -H "Content-Type: application/json"   -d '{"app_name":"demo","environment":"dev"}'
+```
