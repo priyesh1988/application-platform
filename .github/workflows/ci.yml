@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t application-platform:${{ github.sha }} .
+
+  # ecr-push:
+  #   needs: build-test
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     id-token: write
+  #     contents: read
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Configure AWS credentials (OIDC)
+  #       uses: aws-actions/configure-aws-credentials@v4
+  #       with:
+  #         role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+  #         aws-region: ${{ secrets.AWS_REGION }}
+  #     - name: Login to ECR
+  #       uses: aws-actions/amazon-ecr-login@v2
+  #     - name: Build & Push
+  #       env:
+  #         ECR_REPO: ${{ secrets.ECR_REPO }}
+  #       run: |
+  #         docker build -t $ECR_REPO:${{ github.sha }} .
+  #         docker push $ECR_REPO:${{ github.sha }}
+  #         docker tag $ECR_REPO:${{ github.sha }} $ECR_REPO:latest
+  #         docker push $ECR_REPO:latest

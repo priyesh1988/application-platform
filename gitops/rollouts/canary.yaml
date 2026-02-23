@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: application-platform
+spec:
+  replicas: 4
+  strategy:
+    canary:
+      steps:
+        - setWeight: 25
+        - pause: {duration: 30s}
+        - setWeight: 50
+        - pause: {duration: 30s}
+        - setWeight: 100
+  selector:
+    matchLabels:
+      app: application-platform
+  template:
+    metadata:
+      labels:
+        app: application-platform
+    spec:
+      containers:
+      - name: api
+        image: application-platform:latest
+        ports:
+        - containerPort: 8000

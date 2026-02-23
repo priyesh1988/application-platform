@@ -1,0 +1,28 @@
+fastapi==0.111.0
+uvicorn[standard]==0.30.1
+pydantic==2.7.4
+
+# LLM + HTTP
+openai==1.40.6
+httpx==0.27.0
+
+# RAG / Vector
+qdrant-client==1.10.1
+
+# Persistence
+sqlalchemy==2.0.31
+psycopg[binary]==3.2.1
+
+# Eventing
+kafka-python==2.0.2
+
+# Observability
+prometheus-client==0.20.0
+opentelemetry-api==1.26.0
+opentelemetry-sdk==1.26.0
+opentelemetry-exporter-otlp==1.26.0
+opentelemetry-instrumentation-fastapi==0.47b0
+opentelemetry-instrumentation-httpx==0.47b0
+
+# Security
+python-jose[cryptography]==3.3.0

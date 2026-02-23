@@ -1,0 +1,3 @@
+# NOTE: Jaeger exporter was removed from some collector builds.
+# For local dev, this repo exports traces directly to Jaeger OTLP (4318).
+# If you want a collector, use exporters: otlp or otlphttp targeting jaeger:4317/4318.

@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: application-platform
+spec:
+  replicas: 4
+  strategy:
+    blueGreen:
+      activeService: app-platform-active
+      previewService: app-platform-preview
+      autoPromotionEnabled: false
+  selector:
+    matchLabels:
+      app: application-platform
+  template:
+    metadata:
+      labels:
+        app: application-platform
+    spec:
+      containers:
+      - name: api
+        image: application-platform:latest
+        ports:
+        - containerPort: 8000
